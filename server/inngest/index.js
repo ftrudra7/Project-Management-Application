@@ -5,6 +5,8 @@ export const inngest = new Inngest({
   id: "forge",
 });
 
+console.log("INNGEST BUILD: 03-Aug-2026 17:50");
+
 // ================= USER CREATED =================
 
 const syncUserCreation = inngest.createFunction(
