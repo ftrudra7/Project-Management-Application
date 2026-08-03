@@ -154,33 +154,6 @@ const syncWorkspaceCreation = inngest.createFunction(
   }
 );
 
-// ================= WORKSPACE UPDATED =================
-
-const syncWorkspaceUpdation = inngest.createFunction(
-  {
-    id: "sync-workspace-update-from-clerk",
-    trigger: {
-      event: "clerk/organization.updated",
-    },
-  },
-  async ({ event, step }) => {
-    await step.run("update-workspace", async () => {
-      const { data } = event;
-
-      await prisma.workspace.update({
-        where: {
-          id: data.id,
-        },
-        data: {
-          name: data.name,
-          slug: data.slug,
-          imageUrl: data.image_url ?? "",
-        },
-      });
-    });
-  }
-);
-
 // ================= WORKSPACE DELETED =================
 
 const syncWorkspaceDeletion = inngest.createFunction(
