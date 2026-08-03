@@ -3,7 +3,7 @@ import prisma from "../configs/prisma.js";
 
 // Create Inngest client
 export const inngest = new Inngest({
-  id: "forge",
+  id: "my-app",
 });
 
 // ================= USER CREATED =================
