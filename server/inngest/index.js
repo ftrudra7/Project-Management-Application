@@ -6,8 +6,7 @@ export const inngest = new Inngest({
   id: "my-app",
 });
 
-// ================= USER CREATED =================
-
+// Inngest Function to save user data to database
 const syncUserCreation = inngest.createFunction(
   {
     id: "sync-user-from-clerk",
@@ -39,8 +38,7 @@ const syncUserCreation = inngest.createFunction(
   }
 );
 
-// ================= USER UPDATED =================
-
+// Inngest Function to update user data in database
 const syncUserUpdation = inngest.createFunction(
   {
     id: "sync-user-update-from-clerk",
@@ -66,8 +64,7 @@ const syncUserUpdation = inngest.createFunction(
   }
 );
 
-// ================= USER DELETED =================
-
+// Inngest Function to delete user data from database
 const syncUserDeletion = inngest.createFunction(
   {
     id: "sync-user-delete-from-clerk",
@@ -88,8 +85,7 @@ const syncUserDeletion = inngest.createFunction(
   }
 );
 
-// ================= WORKSPACE CREATED =================
-
+// Inngest Function to save workspace data to database
 const syncWorkspaceCreation = inngest.createFunction(
   {
     id: "sync-workspace-from-clerk",
@@ -102,7 +98,8 @@ const syncWorkspaceCreation = inngest.createFunction(
       const { data } = event;
 
       if (!data.created_by) {
-        throw new Error("Organization creator not found.");
+        console.log("Organization creator not found", data);
+        return;
       }
 
       const user = await prisma.user.findUnique({
@@ -112,7 +109,8 @@ const syncWorkspaceCreation = inngest.createFunction(
       });
 
       if (!user) {
-        throw new Error(`User ${data.created_by} not found.`);
+        console.log("Owner user not found:", data.created_by);
+        return;
       }
 
       await prisma.workspace.upsert({
@@ -154,8 +152,33 @@ const syncWorkspaceCreation = inngest.createFunction(
   }
 );
 
-// ================= WORKSPACE DELETED =================
+// Inngest Function to update workspace data in database
+const syncWorkspaceUpdation = inngest.createFunction(
+  {
+    id: "sync-workspace-update-from-clerk",
+    trigger: {
+      event: "clerk/organization.updated",
+    },
+  },
+  async ({ event, step }) => {
+    await step.run("update-workspace", async () => {
+      const { data } = event;
 
+      await prisma.workspace.updateMany({
+        where: {
+          id: data.id,
+        },
+        data: {
+          name: data.name,
+          slug: data.slug,
+          imageUrl: data.image_url ?? "",
+        },
+      });
+    });
+  }
+);
+
+// Inngest Function to delete workspace from database
 const syncWorkspaceDeletion = inngest.createFunction(
   {
     id: "sync-workspace-delete-from-clerk",
@@ -176,8 +199,7 @@ const syncWorkspaceDeletion = inngest.createFunction(
   }
 );
 
-// ================= MEMBER CREATED =================
-
+// Inngest Function to add workspace member to database
 const syncWorkspaceMemberCreation = inngest.createFunction(
   {
     id: "sync-workspace-member-from-clerk",
@@ -211,8 +233,7 @@ const syncWorkspaceMemberCreation = inngest.createFunction(
   }
 );
 
-// ================= MEMBER DELETED =================
-
+// Inngest Function to remove workspace member from database
 const syncWorkspaceMemberDeletion = inngest.createFunction(
   {
     id: "sync-workspace-member-delete-from-clerk",
@@ -234,8 +255,7 @@ const syncWorkspaceMemberDeletion = inngest.createFunction(
   }
 );
 
-// ================= EXPORT =================
-
+// Export all Inngest functions
 export const functions = [
   syncUserCreation,
   syncUserUpdation,
